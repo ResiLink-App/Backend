@@ -1,4 +1,3 @@
-const Wallet = require("../../models/wallet");
 const { generateHash, validatePassword } = require("../../utils/bcrypt");
 const {
   validateSignUp,
@@ -43,7 +42,7 @@ exports.signUp = async (req, res, next) => {
       });
     }
 
-    const { email, password: req_password } = trimmedBody;
+    const { firstName, lastName, email, password: req_password } = trimmedBody;
     const existingEmailUser = await User.findOne({ email });
     if (existingEmailUser) {
       return res.status(409).json({
@@ -57,20 +56,13 @@ exports.signUp = async (req, res, next) => {
     const generatedVerificationCode = generateVerificationCode();
 
     const newUser = new User({
+      firstName, 
+      lastName,
       email,
       password: hashedPassword,
     });
 
     await newUser.save();
-
-    const wallet = new Wallet({
-      userId: newUser._id,
-      balance: 0,
-    });
-
-    const savedWallet = await wallet.save();
-
-    newUser.walletId = savedWallet._id;
 
     const savedUser = await newUser.save();
 
@@ -212,17 +204,6 @@ exports.signIn = async (req, res, next) => {
       user.email,
       user.phoneNumber
     );
-
-    // const templateData = {
-    //   userId: user._id,
-    //   title: "Security Alert",
-    //   body: "We noticed a recent login to your account, if you were not the one, please reset your password",
-    //   type: "SECURITY_ALERT",
-    // };
-
-    // await sendNotification(token, templateData);
-
-    // await sendLoginAlert(user.email);
 
     return res.status(200).json({
       status: true,

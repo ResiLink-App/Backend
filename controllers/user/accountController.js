@@ -1,41 +1,12 @@
 const { cloudinaryUserPfpUploader } = require("../../middlewares/cloudinary");
 const User = require("../../models/user");
-const Product = require("../../models/product");
 const { validatePassword, generateHash } = require("../../utils/bcrypt");
-const { formatWalletBalance } = require("../../utils/functions");
 const {
   validateProfileUpdate,
   validateBusinessProfileUpdate,
   validatePasswordChange,
-  addAddressValidation,
-  editAddressValidation,
-  deleteAddressValidation,
   vaidateProductId,
 } = require("../../utils/validation");
-
-exports.getWalletBalance = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId).populate("walletId");
-
-    if (!user) {
-      return res.status(404).json({ status: false, error: "User not found" });
-    }
-
-    const wallet = user.walletId;
-    if (!wallet) {
-      return res
-        .status(404)
-        .json({ status: false, error: "Wallet not found for this user" });
-    }
-
-    const formattedBalance = formatWalletBalance(wallet.balance);
-
-    return res.status(200).json({ status: true, balance: formattedBalance });
-  } catch (error) {
-    next();
-  }
-};
 
 exports.getUserProfile = async (req, res, next) => {
   try {
@@ -58,25 +29,6 @@ exports.getUserProfile = async (req, res, next) => {
         dateOfBirth: user?.dateOfBirth,
         profilePic: user?.profilePic,
       },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.getBusinessProfile = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId, { password: 0 });
-
-    if (!user) {
-      return res.status(404).json({ status: false, error: "User not found" });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "User business details retrieved successfully",
-      business: user.business,
     });
   } catch (error) {
     next(error);
@@ -161,43 +113,6 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
-exports.updateBusinessProfile = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-    const updatedBusinessProfile = req.body;
-
-    // Validate the input using Joi
-    const { error } = validateBusinessProfileUpdate(updatedBusinessProfile);
-    if (error) {
-      return res.status(400).json({
-        status: false,
-        message: "Validation error",
-        error: error.details[0].message,
-      });
-    }
-
-    const user = await User.findOneAndUpdate(
-      { _id: userId },
-      { $set: { business: updatedBusinessProfile } },
-      { new: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({
-        status: false,
-        error: "User not found",
-      });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "Business Profile updated successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 exports.checkUserProfileCompletion = async (req, res, next) => {
   try {
     const userId = req.user.userId;
@@ -269,210 +184,6 @@ exports.changePassword = async (req, res, next) => {
     return res.status(200).json({
       status: true,
       message: "Password changed successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.getDeliveryAddresses = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ status: false, error: "User not found" });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "Delivery Addresses retrieved successfully",
-      deliveryAddresses: user.deliveryAddresses,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.addDeliveryAddress = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-    const { error } = addAddressValidation(req.body);
-    if (error) {
-      return res.status(400).json({
-        status: false,
-        error: error.details.map((detail) => detail.message),
-      });
-    }
-
-    const { firstName, lastName, phoneNumber, street, city, state } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ status: false, error: "User not found" });
-    }
-
-    user.deliveryAddresses.push({
-      firstName,
-      lastName,
-      phoneNumber,
-      street,
-      city,
-      state,
-    });
-    await user.save();
-
-    return res.status(201).json({
-      status: true,
-      message: "Delivery Address added successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.editDeliveryAddress = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-    const { addressId } = req.params;
-    const { error } = editAddressValidation({ addressId, ...req.body });
-    if (error) {
-      return res.status(400).json({
-        status: false,
-        error: error.details.map((detail) => detail.message),
-      });
-    }
-
-    const { firstName, lastName, phoneNumber, street, city, state } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ status: false, error: "User not found" });
-    }
-
-    const address = user.deliveryAddresses.id(addressId);
-    if (!address) {
-      return res
-        .status(404)
-        .json({ status: false, error: "Delivery Address not found" });
-    }
-
-    address.firstName = firstName || address.firstName;
-    address.lastName = lastName || address.lastName;
-    address.phoneNumber = phoneNumber || address.phoneNumber;
-    address.street = street || address.street;
-    address.city = city || address.city;
-    address.state = state || address.state;
-
-    await user.save();
-
-    return res.status(200).json({
-      status: true,
-      message: "Delivery Address updated successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.deleteDeliveryAddress = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-    const { error } = deleteAddressValidation(req.params);
-    if (error) {
-      return res.status(400).json({
-        status: false,
-        error: error.details.map((detail) => detail.message),
-      });
-    }
-
-    const { addressId } = req.params;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ status: false, error: "User not found" });
-    }
-
-    const address = user.deliveryAddresses.id(addressId);
-    if (!address) {
-      return res
-        .status(404)
-        .json({ status: false, error: "Delivery Address not found" });
-    }
-
-    address.deleteOne();
-    await user.save();
-
-    return res.status(200).json({
-      status: true,
-      message: "Delivery Address deleted successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.addProductToFavorites = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-    const { productId } = req.params;
-    const { error } = vaidateProductId(req.params);
-    if (error) {
-      return res.status(400).json({
-        status: false,
-        error: error.details.map((detail) => detail.message),
-      });
-    }
-
-    // Check if the product exists
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({
-        status: false,
-        message: "Product not found",
-      });
-    }
-
-    // Check if the user already has the product in their favorites
-    const user = await User.findById(userId);
-    if (user.favorites.includes(productId)) {
-      return res.status(400).json({
-        status: false,
-        message: "Product is already in favorites",
-      });
-    }
-
-    // Add the product to the user's favorites
-    user.favorites.push(productId);
-    await user.save();
-
-    return res.status(200).json({
-      status: true,
-      message: "Product added to favorites successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.getFavorites = async (req, res, next) => {
-  try {
-    const userId = req.user.userId;
-
-    // Find the user and populate the favorites field with product details
-    const user = await User.findById(userId).populate('favorites');
-
-    if (!user) {
-      return res.status(404).json({
-        status: false,
-        message: "User not found",
-      });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "Favorites retrieved successfully",
-      favorites: user.favorites,
     });
   } catch (error) {
     next(error);

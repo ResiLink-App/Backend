@@ -1,33 +1,14 @@
 const mongoose = require("mongoose");
 
-const addressSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-  },
-  lastName: {
-    type: String,
-  },
-  phoneNumber: {
-    type: String,
-  },
-  street: {
-    type: String,
-  },
-  city: {
-    type: String,
-  },
-  state: {
-    type: String,
-  }
-});
-
 const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
+      required: true,
     },
     lastName: {
       type: String,
+      required: true,
     },
     email: {
       type: String,
@@ -53,11 +34,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       default:
-        "https://res.cloudinary.com/dlguxtmj2/image/upload/v1721401143/VTribe/v1/static/default-pfp.jpg",
-    },
-    walletId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Wallet",
+        "https://themedox.com/mykd/wp-content/uploads/2023/10/team02.png",
     },
     isPhoneVerified: {
       type: Boolean,
@@ -67,33 +44,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    business: {
-      name: {
-        type: String,
-      },
-      about: {
-        type: String,
-      },
-      address: {
-        type: String,
-      },
-      city: {
-        type: String,
-      },
-      state: {
-        type: String,
-      },
-    },
-    deliveryAddresses: [addressSchema],
-    passcode: {
-      type: String,
-    },
-    favorites: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
   },
   { timestamps: true }
 );

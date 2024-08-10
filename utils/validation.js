@@ -3,6 +3,8 @@ const { default: mongoose } = require("mongoose");
 
 exports.validateSignUp = (details) => {
   const signUpSchema = Joi.object({
+    firstName: Joi.string().trim().required(),
+    lastName: Joi.string().trim().required(),
     email: Joi.string().trim().email().required(),
     password: Joi.string().trim().required(),
   });

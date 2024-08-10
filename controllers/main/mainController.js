@@ -1,7 +1,7 @@
 exports.home = (req, res) => {
   res.status(200).json({
     status: true,
-    message: "Escrow Backend API is up and running!",
+    message: "Resilink Backend API is up and running!",
   });
 };
 

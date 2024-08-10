@@ -11,7 +11,7 @@ const {
   vaidateReview,
 } = require("../../utils/validation");
 
-exports.createProduct = async (req, res, next) => {
+exports.listProp = async (req, res, next) => {
   try {
     const { error } = validateProduct(req.body);
     if (error) {
