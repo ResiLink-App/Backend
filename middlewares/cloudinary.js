@@ -14,29 +14,56 @@ function cloudinaryUserPfpUploader(imagePath, callback) {
   );
 }
 
-function cloudinaryProdUploader(images, callback) {
-  const uploadedImagesURL = [];
-  let completedCount = 0;
+function cloudinaryListingUploader(media, callback) {
+  const uploadedMedia = {
+    images: [],
+    video: ""
+  };
 
-  images.forEach((image, index) => {
+  let completedCount = 0;
+  const totalFiles = media.images.length + (media.video ? 1 : 0);
+
+  // Upload images
+  media.images.forEach((image, index) => {
     cloudinary.uploader.upload(
       image.path,
-      { folder: "resilink/prop/images", resource_type: "auto" },
+      { folder: "resilink/prop/images", resource_type: "image" },
       function (error, result) {
         completedCount++;
         if (error) {
           callback(error, null);
-          return; // Exit the function early if there's an error
+          return;
         }
-        uploadedImagesURL[index] = result.secure_url;
+        uploadedMedia.images[index] = result.secure_url;
 
-        // Check if all files have been uploaded
-        if (completedCount === images.length) {
-          callback(null, uploadedImagesURL);
+        // Check if all media have been uploaded
+        if (completedCount === totalFiles) {
+          callback(null, uploadedMedia);
         }
       }
     );
   });
+
+  // Upload video if provided
+  if (media.video) {
+    cloudinary.uploader.upload(
+      media.video.path,
+      { folder: "resilink/prop/videos", resource_type: "video" },
+      function (error, result) {
+        completedCount++;
+        if (error) {
+          callback(error, null);
+          return;
+        }
+        uploadedMedia.video = result.secure_url;
+
+        if (completedCount === totalFiles) {
+          callback(null, uploadedMedia);
+        }
+      }
+    );
+  }
 }
 
-module.exports = { cloudinaryUserPfpUploader, cloudinaryProdUploader };
+
+module.exports = { cloudinaryUserPfpUploader, cloudinaryListingUploader };

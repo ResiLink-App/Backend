@@ -15,7 +15,7 @@ const {
   getDeliveryAddresses,
   getFavorites,
   addProductToFavorites,
-} = require("../../controllers/user/accountController");
+} = require("../../controllers/agent/accountController");
 const {
   authenticateUser,
 } = require("../../middlewares/authenticationMiddleware");
