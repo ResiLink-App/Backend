@@ -5,7 +5,7 @@ const {
   authenticateUser,
 } = require("../../middlewares/authenticationMiddleware");
 const upload = require("../../middlewares/upload");
-const { addListing, getAllListings } = require("../../controllers/agent/listingController");
+const { addListing, getAllListings, getListingDetails } = require("../../controllers/agent/listingController");
 
 listingRouter.post(
   "/add",
@@ -18,8 +18,13 @@ listingRouter.post(
 listingRouter.get(
   "/all",
   authorizeUser,
-  authenticateUser,
   getAllListings
+);
+
+listingRouter.get(
+  "/:listingId",
+  authorizeUser,
+  getListingDetails
 );
 
 module.exports = listingRouter;

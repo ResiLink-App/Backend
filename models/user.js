@@ -23,6 +23,9 @@ const userSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
     },
+    whatsapp: {
+      type: String,
+    },
     gender: {
       type: String,
       enum: ["Male", "Female"],

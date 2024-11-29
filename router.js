@@ -8,14 +8,16 @@ const errorMiddleware = require("./middlewares/errorMiddleware");
 const { notFound } = require("./controllers/main/mainController");
 const accountRouter = require("./routes/agent/accountRoute");
 const listingRouter = require("./routes/agent/listingRoute");
+const paymentRouter = require("./routes/agent/paymentRoute");
 
 // Main Routes
 app.use(mainRouter);
 
-// Aent Routes
+// Agent Routes
 app.use("/v1/agent/auth", authRouter);
 app.use("/v1/agent/listing", listingRouter);
 app.use("/v1/agent/account", accountRouter);
+app.use("/v1/agent/payment", paymentRouter);
 
 // Catch-all route for handling 404 not found
 app.use(notFound);

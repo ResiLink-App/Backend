@@ -3,9 +3,7 @@ const User = require("../../models/user");
 const { validatePassword, generateHash } = require("../../utils/bcrypt");
 const {
   validateProfileUpdate,
-  validateBusinessProfileUpdate,
   validatePasswordChange,
-  vaidateProductId,
 } = require("../../utils/validation");
 
 exports.getUserProfile = async (req, res, next) => {

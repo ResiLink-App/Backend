@@ -70,8 +70,7 @@ exports.getAllListings = async (req, res, next) => {
   try {
     const listings = await Listing.find().populate({
       path: "postedBy",
-      select:
-        "_id email profilePic firstName gender lastName phoneNumber",
+      select: "_id email profilePic firstName gender lastName phoneNumber",
     }); // Retrieve all listings from the database
 
     if (!listings || listings.length === 0) {
@@ -85,6 +84,24 @@ exports.getAllListings = async (req, res, next) => {
       status: true,
       message: "Listings retrieved successfully.",
       data: listings, // Include the retrieved listings in the response
+    });
+  } catch (err) {
+    next(err); // Pass any errors to the error handler
+  }
+};
+
+exports.getListingDetails = async (req, res, next) => {
+  try {
+    const { listingId } = req.params;
+    const listing = await Listing.findById(listingId).populate({
+      path: "postedBy",
+      select: "_id email profilePic firstName gender lastName phoneNumber",
+    }); // Retrieve all listings from the database
+
+    return res.status(200).json({
+      status: true,
+      message: "Listing details retrieved successfully.",
+      data: listing, // Include the retrieved listings in the response
     });
   } catch (err) {
     next(err); // Pass any errors to the error handler

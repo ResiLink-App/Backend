@@ -73,3 +73,27 @@ exports.validateAddListing = (product) => {
 
   return schema.validate(product);
 };
+
+exports.validateProfileUpdate = (details) => {
+  const schema = Joi.object({
+    firstName: Joi.string().optional(),
+    lastName: Joi.string().optional(),
+    phoneNumber: Joi.string().optional(),
+    whatsapp: Joi.string().valid("Male", "Female").optional(),
+  });
+
+  return schema.validate(details);
+};
+
+exports.validatePaymentRequest = (data) => {
+  const schema = Joi.object({
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    email: Joi.string().email().required(),
+    phone: Joi.string().required(),
+    listingId: Joi.string().required(),
+    amount: Joi.number().required(),
+  });
+
+  return schema.validate(data);
+};
