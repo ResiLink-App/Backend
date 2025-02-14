@@ -107,3 +107,38 @@ exports.getListingDetails = async (req, res, next) => {
     next(err); // Pass any errors to the error handler
   }
 };
+
+
+exports.deleteListing = async (req, res, next) => {
+  try {
+    const { listingId } = req.params;
+    const userId = req.user.userId; // Get the logged-in user ID
+
+    // Find the listing
+    const listing = await Listing.findById(listingId);
+    if (!listing) {
+      return res.status(404).json({
+        status: false,
+        message: "Listing not found.",
+      });
+    }
+
+    // Check if the logged-in user is the owner of the listing
+    if (listing.postedBy.toString() !== userId) {
+      return res.status(403).json({
+        status: false,
+        message: "You are not authorized to delete this listing.",
+      });
+    }
+
+    // Delete the listing
+    await Listing.findByIdAndDelete(listingId);
+
+    return res.status(200).json({
+      status: true,
+      message: "Listing deleted successfully.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
